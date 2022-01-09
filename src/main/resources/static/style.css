@@ -22,6 +22,7 @@ img {
 .empty {
     width: 100%;
     padding-bottom: 100%;
+    margin: 4%;
 }
 
 .tile-container {

@@ -29,28 +29,38 @@ $(function() {
             if (coords == cell["row"] + "-" + cell["column"]) {
                 moved = cell;
             }
-        })
+        });
+
         possibleMoves = [];
 
         if (moved) {
-            $.ajax({
-                url: "/move",
-                data: { "from" : lastClicked,
-                        "to" : coords,
-                        "player" : user}
-            });
-
             // move piece image to new location
             var image = $("#t" + lastClicked).html();
             $("#t" + lastClicked + " img").remove();
             $("#t" + lastClicked).html("<div class='empty'></div>");
             $(this).html(image);
 
+            $.ajax({
+                url: "/move",
+                data: { "from" : lastClicked,
+                        "to" : coords,
+                        "player" : user},
+                success:
+                function (data) {
+                    if (data["display"] == "NONE") {
+                       $("#t" + data["position"]).html("<div class='empty'></div>");
+                    } else {
+                       $("#t" + data["position"]).html("<img class='piece' src='" + data["display"] + "'>");
+                    }
+                }
+            });
+
             if (user == "white") {
                 user = "black";
             } else {
                 user = "white"
             }
+
             return;
         }
 

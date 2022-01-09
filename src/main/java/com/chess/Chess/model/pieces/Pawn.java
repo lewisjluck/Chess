@@ -28,11 +28,9 @@ public class Pawn extends Piece {
         if (player.getColour() == Colour.WHITE) {
             attackDirections.add(new Position(-1, 1));
             attackDirections.add(new Position(-1, -1));
-            direction = new Position(-1, 0);
         } else {
             attackDirections.add(new Position(1, 1));
             attackDirections.add(new Position(1, -1));
-            direction = new Position(1, 0);
         }
 
         int moves = 1;
@@ -58,6 +56,11 @@ public class Pawn extends Piece {
             if (board.getPieceFromPosition(attackPosition) != null
                     && board.getPieceFromPosition(attackPosition).getColour() != player.getColour()
                     && !Board.isOutOfBounds(attackPosition)) {
+                possibleMoves.add(new Position(attackPosition));
+            } else if (Board.getPassantPawnPosition() != null
+                    && board.getPieceFromPosition(Board.getPassantPawnPosition()).getColour() != player.getColour()
+                    && board.getPieceFromPosition(Board.getPassantAttackPosition()) == null
+                    && attackPosition.equals(Board.getPassantAttackPosition())) {
                 possibleMoves.add(new Position(attackPosition));
             }
         }

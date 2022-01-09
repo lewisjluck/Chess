@@ -74,6 +74,10 @@ public class Position {
 
     @Override
     public String toString() {
+        return "" + row + "-" + column;
+    }
+
+    public String getDisplay() {
         char col = (char) (column + 97);
         return "(" + col + "," + (8 - row) + ")";
     }

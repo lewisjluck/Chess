@@ -23,6 +23,14 @@ public class Board {
         passantPawnPosition = null;
     }
 
+    public static Position getPassantAttackPosition() {
+        return passantAttackPosition;
+    }
+
+    public static Position getPassantPawnPosition() {
+        return passantPawnPosition;
+    }
+
     public List<List<String>> getDisplay() {
         List<List<String>> display = new ArrayList<>();
 
@@ -91,11 +99,13 @@ public class Board {
         board.put(position, selectedPiece);
     }
 
-    public void move(Position from, Position to, Player player) {
+    public HashMap<String, String> move(Position from, Position to, Player player) {
         Piece pieceToMove = getPieceFromPosition(from);
         if (pieceToMove == null) {
-            return;
+            return null;
         }
+
+        HashMap<String, String> positionsToChange = null;
 
         if (pieceToMove.getPossibleMoves(this, from, player).contains(to)) {
             if (pieceToMove instanceof Pawn) {
@@ -119,6 +129,9 @@ public class Board {
 
             if (to.equals(passantAttackPosition)) {
                 board.remove(passantPawnPosition);
+                positionsToChange = new HashMap<>();
+                positionsToChange.put("position", "" + passantPawnPosition.toString());
+                positionsToChange.put("display", "" + "NONE");
             }
 
             board.put(to, pieceToMove);
@@ -129,6 +142,8 @@ public class Board {
                 passantAttackPosition = null;
             }
         }
+
+        return positionsToChange;
     }
 
     public List<Position> getMoves(Position position, Player player) {
