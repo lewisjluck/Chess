@@ -1,0 +1,46 @@
+.dark {
+    background-color: #769656;
+}
+
+.light {
+    background-color: #eeeed2;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+img {
+    width: 100%;
+    display: block;
+    margin: 4%;
+}
+
+.empty {
+    width: 100%;
+    padding-bottom: 100%;
+}
+
+.tile-container {
+    width: min(90vh, 100vw);
+}
+
+.light-clicked {
+    background-color: #f6f67e !important;
+}
+
+.dark-clicked {
+    background-color: #bbca3d !important;
+}
+
+.circle-option {
+    border-radius: 50%;
+    height: 40%;
+    width: 40%;
+    background-color: rgba(95, 95, 95, 0.5);
+    display: block;
+    padding: 0;
+}
