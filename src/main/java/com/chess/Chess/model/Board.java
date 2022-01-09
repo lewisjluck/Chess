@@ -156,35 +156,4 @@ public class Board {
         }
         return builder.toString();
     }
-
-    public void testBoard(Position position, Player player) {
-        List<Position> moves = getMoves(position, player);
-        StringJoiner builder = new StringJoiner("");
-        for (int row = 0; row < 8; row++) {
-            builder.add("|");
-            for (int col = 0; col < 8; col++) {
-                if (moves.contains(new Position(row, col))) {
-                    builder.add("*|");
-                } else if (getPieceFromPosition(new Position(row, col)) == null) {
-                    builder.add(" |");
-                } else {
-                    Piece piece = getPieceFromPosition(new Position(row, col));
-                    builder.add(piece.getSymbol() + "|");
-                }
-            }
-            builder.add("\n------------------\n");
-        }
-        System.out.println(builder);
-    }
-
-    public static void test1() {
-        Board board = new Board();
-        board.testBoard(new Position(6, 1), board.player2);
-        board.move(new Position(1,1), new Position(3,1), board.player1);
-        board.testBoard(new Position(0, 2), board.player1);
-        board.move(new Position(1,4), new Position(3,4),board.player1);
-        board.testBoard(new Position(0,3), board.player1);
-        board.move(new Position(0,3), new Position(2, 5), board.player1);
-        board.testBoard(new Position(2, 5), board.player1);
-    }
 }
