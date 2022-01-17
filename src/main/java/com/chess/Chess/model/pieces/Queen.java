@@ -2,6 +2,7 @@ package com.chess.Chess.model.pieces;
 
 import com.chess.Chess.model.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Queen extends Piece {
@@ -15,10 +16,10 @@ public class Queen extends Piece {
     }
 
     @Override
-    public List<Position> getPossibleMoves(Board board, Position position, Player player) {
-        List<Position> directions = straightDirections;
+    public List<Position> getPossibleMoves(Board board, Position position, Colour colour) {
+        List<Position> directions = new ArrayList<>(straightDirections);
         directions.addAll(diagonalDirections);
 
-        return getMovesFromDirection(directions, board, position, player);
+        return getMovesFromDirection(directions, board, position, colour);
     }
 }

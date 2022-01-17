@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public abstract class Piece {
     private final Colour colour;
-    public abstract List<Position> getPossibleMoves(Board board, Position position, Player player);
+    public abstract List<Position> getPossibleMoves(Board board, Position position, Colour colour);
     public static final List<Position> straightDirections = new ArrayList<>(Arrays.asList(
             new Position(0, -1),
             new Position(-1, 0),
@@ -52,7 +52,7 @@ public abstract class Piece {
 
     public abstract String getSymbol();
 
-    public List<Position> getMovesFromDirection(List<Position> directions, Board board, Position position, Player player) {
+    public List<Position> getMovesFromDirection(List<Position> directions, Board board, Position position, Colour colour) {
         List<Position> possibleMoves = new ArrayList<>();
 
         Position currentPosition = new Position(position);
@@ -70,7 +70,7 @@ public abstract class Piece {
 
             Piece currentPiece = board.getPieceFromPosition(currentPosition);
             if (currentPiece != null
-                    && currentPiece.getColour() != player.getColour()) {
+                    && currentPiece.getColour() != colour) {
                 possibleMoves.add(new Position(currentPosition));
             }
 
@@ -81,7 +81,7 @@ public abstract class Piece {
     }
 
     public String getDisplay() {
-        return colour.toString() + "_" + getClass().getSimpleName() + ".png";
+        return "pieces/" + colour.toString() + "_" + getClass().getSimpleName() + ".png";
     }
 }
 

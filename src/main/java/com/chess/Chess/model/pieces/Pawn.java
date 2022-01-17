@@ -18,14 +18,14 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public List<Position> getPossibleMoves(Board board, Position position, Player player) {
+    public List<Position> getPossibleMoves(Board board, Position position, Colour colour) {
         List<Position> possibleMoves = new ArrayList<>();
 
         Position currentPosition = new Position(position);
 
-        Position direction = Board.getPlayerForwardDirection(player);
+        Position direction = Board.getForwardDirection(colour);
         List<Position> attackDirections = new ArrayList<>();
-        if (player.getColour() == Colour.WHITE) {
+        if (colour == Colour.WHITE) {
             attackDirections.add(new Position(-1, 1));
             attackDirections.add(new Position(-1, -1));
         } else {
@@ -34,7 +34,7 @@ public class Pawn extends Piece {
         }
 
         int moves = 1;
-        if (canDouble(position, player)) {
+        if (canDouble(position, colour)) {
             moves = 2;
         }
 
@@ -54,13 +54,13 @@ public class Pawn extends Piece {
             attackPosition.add(attackDirection);
 
             if (board.getPieceFromPosition(attackPosition) != null
-                    && board.getPieceFromPosition(attackPosition).getColour() != player.getColour()
+                    && board.getPieceFromPosition(attackPosition).getColour() != colour
                     && !Board.isOutOfBounds(attackPosition)) {
                 possibleMoves.add(new Position(attackPosition));
-            } else if (Board.getPassantPawnPosition() != null
-                    && board.getPieceFromPosition(Board.getPassantPawnPosition()).getColour() != player.getColour()
-                    && board.getPieceFromPosition(Board.getPassantAttackPosition()) == null
-                    && attackPosition.equals(Board.getPassantAttackPosition())) {
+            } else if (board.getPassantPawnPosition() != null
+                    && board.getPieceFromPosition(board.getPassantPawnPosition()).getColour() != colour
+                    && board.getPieceFromPosition(board.getPassantAttackPosition()) == null
+                    && attackPosition.equals(board.getPassantAttackPosition())) {
                 possibleMoves.add(new Position(attackPosition));
             }
         }
@@ -87,7 +87,7 @@ public class Pawn extends Piece {
         return canTakePassant;
     }
 
-    private boolean canDouble(Position position, Player player) {
-        return (position.isInFirstRow(player.getColour()));
+    private boolean canDouble(Position position, Colour colour) {
+        return (position.isInFirstRow(colour));
     }
 }

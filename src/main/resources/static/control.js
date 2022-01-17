@@ -26,6 +26,7 @@ $(function() {
         var moved = null;
         possibleMoves.forEach(cell => {
             $("#t" + cell["row"] + "-" + cell["column"] + " .empty").removeClass("circle-option");
+            $("#t" + cell["row"] + "-" + cell["column"] + " img").removeClass("piece-option");
             if (coords == cell["row"] + "-" + cell["column"]) {
                 moved = cell;
             }
@@ -47,10 +48,14 @@ $(function() {
                         "player" : user},
                 success:
                 function (data) {
-                    if (data["display"] == "NONE") {
-                       $("#t" + data["position"]).html("<div class='empty'></div>");
-                    } else {
-                       $("#t" + data["position"]).html("<img class='piece' src='" + data["display"] + "'>");
+                    for (var i = 0; i < data["display"].length; i++) {
+                        var display = data["display"][i];
+                        var position = data["position"][i];
+                        if (display == "NONE") {
+                            $("#t" + position).html("<div class='empty'></div>");
+                        } else {
+                            $("#t" + position).html("<img class='piece' src='" + display + "'>");
+                        }
                     }
                 }
             });
@@ -71,7 +76,8 @@ $(function() {
         }).then(function(data) {
             console.log(data);
             for (var i = 0; i < data.length; i++) {
-               $("#t" + data[i]["row"] + "-" + data[i]["column"] + " .empty").toggleClass("circle-option");
+               $("#t" + data[i]["row"] + "-" + data[i]["column"] + " .empty").addClass("circle-option");
+               $("#t" + data[i]["row"] + "-" + data[i]["column"] + " img").addClass("piece-option")
                possibleMoves.push(data[i]);
             }
         });

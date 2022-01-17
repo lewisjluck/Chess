@@ -9,9 +9,13 @@ public class Board {
     private Player player2;
     private Map<Position, Piece> board;
     private List<Piece> takenPieces;
-    private static Position passantAttackPosition;
-    private static Position passantPawnPosition;
-    private static int passantTurn;
+    private Position passantAttackPosition;
+    private Position passantPawnPosition;
+    private int passantTurn;
+    private Position castleRookTo;
+    private Position castleRookFrom;
+    private Position castleKingTo;
+    private HashMap<Colour, Position> kingPositions;
 
     public Board() {
         player1 = new Player("TestPlayer1", Colour.BLACK);
@@ -21,18 +25,34 @@ public class Board {
         passantTurn = 1;
         passantAttackPosition = null;
         passantPawnPosition = null;
+        castleRookTo = null;
+        castleRookFrom = null;
+        kingPositions.put(Colour.BLACK, new Position(0, 4));
+        kingPositions.put(Colour.WHITE, new Position(7, 4));
     }
 
-    public static Position getPassantAttackPosition() {
+    public Position getPassantAttackPosition() {
         return passantAttackPosition;
     }
 
-    public static Position getPassantPawnPosition() {
+    public Position getPassantPawnPosition() {
         return passantPawnPosition;
     }
 
+    public void setCastleRookTo(Position castleRookTo) {
+        this.castleRookTo = castleRookTo;
+    }
+
+    public void setCastleRookFrom(Position castleRookFrom) {
+        this.castleRookFrom = castleRookFrom;
+    }
+
+    public void setCastleKingTo(Position castleKingTo) {
+        this.castleKingTo = castleKingTo;
+    }
+
     public List<List<String>> getDisplay() {
-        List<List<String>> display = new ArrayList<>();
+2        List<List<String>> display = new ArrayList<>();
 
         for (int row = 0; row < 8; row++) {
             List<String> rowDisplay = new ArrayList<>();
@@ -77,8 +97,8 @@ public class Board {
         board.put(new Position(row,7), new Rook(colour));
     }
 
-    public static Position getPlayerForwardDirection(Player player) {
-        if (player.getColour() == Colour.WHITE) {
+    public static Position getForwardDirection(Colour colour) {
+        if (colour == Colour.WHITE) {
             return new Position(-1, 0);
         } else {
             return new Position(1, 0);
@@ -93,45 +113,63 @@ public class Board {
         return (position.getRow() > 7 || position.getRow() < 0 || position.getColumn() > 7 || position.getColumn() < 0);
     }
 
-    public void promote (Position position, Player player) {
+    public void promote (Position position, Colour colour) {
         /// somehow get promotion selection
-        Piece selectedPiece = new Queen(player.getColour());
+        Piece selectedPiece = new Queen(colour);
         board.put(position, selectedPiece);
     }
 
-    public HashMap<String, String> move(Position from, Position to, Player player) {
+    public HashMap<String, List<String>> move(Position from, Position to, Colour colour) {
         Piece pieceToMove = getPieceFromPosition(from);
         if (pieceToMove == null) {
             return null;
         }
 
-        HashMap<String, String> positionsToChange = null;
+        HashMap<String, List<String>> positionsToChange = new HashMap<>();
+        positionsToChange.put("position", new ArrayList<>());
+        positionsToChange.put("display", new ArrayList<>());
 
-        if (pieceToMove.getPossibleMoves(this, from, player).contains(to)) {
+        if (pieceToMove.getPossibleMoves(this, from, colour).contains(to)) {
             if (pieceToMove instanceof Pawn) {
-                if (Math.abs(to.getRow() - from.getRow()) == 2 && from.isInFirstRow(player.getColour())) {
+                if (Math.abs(to.getRow() - from.getRow()) == 2 && from.isInFirstRow(colour)) {
                     passantPawnPosition = to;
                     passantAttackPosition = new Position(from);
-                    passantAttackPosition.add(getPlayerForwardDirection(player));
+                    passantAttackPosition.add(getForwardDirection(colour));
                     passantTurn = 2;
                 }
 
-                if (to.isInLastRow(player.getColour())) {
-                    promote(to, player);
+                if (to.isInLastRow(colour)) {
+                    promote(to, colour);
                 }
+            } else if (pieceToMove instanceof King) {
+                ((King) pieceToMove).setHasMoved(true);
+                kingPositions.put(pieceToMove.getColour(), to);
+
+            } else if (pieceToMove instanceof Rook) {
+                ((Rook) pieceToMove).setHasMoved(true);
             }
 
             board.remove(from);
 
+            // Isolate communication with front end into separate class
             if (getPieceFromPosition(to) != null) {
                 takenPieces.add(getPieceFromPosition(to));
             }
 
             if (to.equals(passantAttackPosition)) {
                 board.remove(passantPawnPosition);
-                positionsToChange = new HashMap<>();
-                positionsToChange.put("position", "" + passantPawnPosition.toString());
-                positionsToChange.put("display", "" + "NONE");
+                positionsToChange.get("position").add(passantPawnPosition.toString());
+                positionsToChange.get("display").add("NONE");
+            }
+
+            if (to.equals(castleKingTo)) {
+                Piece pieceToCastle = getPieceFromPosition(castleRookFrom);
+                board.remove(castleRookFrom);
+                board.put(castleRookTo, pieceToCastle);
+                positionsToChange.get("position").add(castleRookFrom.toString());
+                positionsToChange.get("display").add("NONE");
+                positionsToChange.get("position").add(castleRookTo.toString());
+                positionsToChange.get("display").add(pieceToCastle.getDisplay());
             }
 
             board.put(to, pieceToMove);
@@ -141,17 +179,61 @@ public class Board {
                 passantPawnPosition = null;
                 passantAttackPosition = null;
             }
+
+            // CHECK CHECKMATE OF OTHER PLAYER
         }
 
         return positionsToChange;
     }
 
-    public List<Position> getMoves(Position position, Player player) {
+    public List<Position> getMoves(Position position, Colour colour) {
         Piece piece = getPieceFromPosition(position);
-        if (piece == null || piece.getColour() != player.getColour()) {
+        if (piece == null || piece.getColour() != colour) {
             return new ArrayList<>();
         }
-        return piece.getPossibleMoves(this, position, player);
+        List<Position> moves = piece.getPossibleMoves(this, position, colour);
+
+        if (squareInCheck(kingPositions.get(colour), colour)) {
+            List<Position> validMoves = new ArrayList<>();
+            for (Position to : moves) {
+                if (doesMoveGetOutOfCheck(position, to, colour)) {
+                    validMoves.add(to);
+                }
+            }
+            moves = validMoves;
+        }
+
+        return moves;
+    }
+
+    private boolean doesMoveGetOutOfCheck(Position from, Position to, Colour colour) {
+        Piece pieceToMove = board.remove(from);
+        board.put(to, pieceToMove);
+        boolean stillInCheck = squareInCheck(kingPositions.get(colour), colour);
+        board.remove(to);
+        board.put(from, pieceToMove);
+        return stillInCheck;
+    }
+
+    public boolean squareInCheck(Position checkPosition, Colour colour) {
+        for (Map.Entry<Position, Piece> square : board.entrySet()) {
+            Piece piece = square.getValue();
+            Position position = square.getKey();
+
+            List<Position> moves;
+            if (colour == piece.getColour()) {
+                continue;
+            } else {
+                moves = getMoves(position, piece.getColour());
+            }
+
+            for (Position move : moves) {
+                if (move.equals(checkPosition)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

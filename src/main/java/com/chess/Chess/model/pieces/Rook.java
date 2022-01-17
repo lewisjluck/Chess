@@ -2,12 +2,15 @@ package com.chess.Chess.model.pieces;
 
 import com.chess.Chess.model.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Rook extends Piece {
+    private boolean hasMoved;
 
     public Rook(Colour colour) {
         super(colour);
+        hasMoved = false;
     }
 
     @Override
@@ -16,9 +19,17 @@ public class Rook extends Piece {
     }
 
     @Override
-    public List<Position> getPossibleMoves(Board board, Position position, Player player) {
-        List<Position> directions = straightDirections;
+    public List<Position> getPossibleMoves(Board board, Position position, Colour colour) {
+        List<Position> directions = new ArrayList<>(straightDirections);
 
-        return getMovesFromDirection(directions, board, position, player);
+        return getMovesFromDirection(directions, board, position, colour);
+    }
+
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+
+    public void setHasMoved(boolean set) {
+        hasMoved = set;
     }
 }

@@ -26,7 +26,7 @@ img {
 }
 
 .tile-container {
-    width: min(90vh, 100vw);
+    width: min(80vh, 100vw);
 }
 
 .light-clicked {
@@ -44,4 +44,9 @@ img {
     background-color: rgba(95, 95, 95, 0.5);
     display: block;
     padding: 0;
+}
+
+.piece-option {
+    border-radius: 50%;
+    border: 5px solid rgba(200, 200, 200, 0.5);
 }

@@ -16,7 +16,7 @@ public class Knight extends Piece {
     }
 
     @Override
-    public List<Position> getPossibleMoves(Board board, Position position, Player player) {
+    public List<Position> getPossibleMoves(Board board, Position position, Colour colour) {
         List<Position> possibleMoves = new ArrayList<>();
         for (int stemDirection = -2; stemDirection < 5; stemDirection += 4) {
             for (int hookDirection = -1; hookDirection < 2; hookDirection += 2) {
@@ -28,7 +28,7 @@ public class Knight extends Piece {
                         currentPosition.add(new Position(hookDirection, stemDirection));
                     }
                     Piece piece = board.getPieceFromPosition(currentPosition);
-                    if (Board.isOutOfBounds(currentPosition) || (piece != null && piece.getColour() == player.getColour())) {
+                    if (Board.isOutOfBounds(currentPosition) || (piece != null && piece.getColour() == colour)) {
                         continue;
                     }
                     possibleMoves.add(new Position(currentPosition));

@@ -2,6 +2,7 @@ package com.chess.Chess.model.pieces;
 
 import com.chess.Chess.model.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Bishop extends Piece {
@@ -15,9 +16,9 @@ public class Bishop extends Piece {
     }
 
     @Override
-    public List<Position> getPossibleMoves(Board board, Position position, Player player) {
-        List<Position> directions = diagonalDirections;
+    public List<Position> getPossibleMoves(Board board, Position position, Colour colour) {
+        List<Position> directions = new ArrayList<>(diagonalDirections);
 
-        return getMovesFromDirection(directions, board, position, player);
+        return getMovesFromDirection(directions, board, position, colour);
     }
 }
