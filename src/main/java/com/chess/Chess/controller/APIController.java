@@ -18,14 +18,14 @@ import java.util.Optional;
 public class APIController {
     @GetMapping("/get_moves")
     public List<Position> getMoves(@RequestParam String coords, @RequestParam String player) {
-        Position position = Position.getPositionFromString(coords);
+        Position position = Parser.getPositionFromString(coords);
         return HomeController.board.getMoves(position, Colour.valueOf(player.toUpperCase(Locale.ROOT)));
     }
 
     @GetMapping("/move")
     public HashMap<String, List<String>> move(@RequestParam String player, @RequestParam String from, @RequestParam String to) {
-        Position moveFrom = Position.getPositionFromString(from);
-        Position moveTo = Position.getPositionFromString(to);
+        Position moveFrom = Parser.getPositionFromString(from);
+        Position moveTo = Parser.getPositionFromString(to);
         return HomeController.board.move(moveFrom, moveTo, Colour.valueOf(player.toUpperCase(Locale.ROOT)));
     }
 }

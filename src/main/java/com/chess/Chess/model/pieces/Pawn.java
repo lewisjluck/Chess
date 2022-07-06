@@ -33,29 +33,23 @@ public class Pawn extends Piece {
             attackDirections.add(new Position(1, -1));
         }
 
-        int moves = 1;
-        if (canDouble(position, colour)) {
-            moves = 2;
-        }
+        int moves = canDouble(position, colour) ? 2 : 1;
 
         for (int i = 0; i < moves; i++) {
             currentPosition.add(direction);
-            if (Board.isOutOfBounds(currentPosition)) {
+            Piece piece = board.getPieceFromPosition(currentPosition);
+            if (currentPosition.isOutOfBounds() || piece != null) {
                 break;
             }
-            if (board.getPieceFromPosition(currentPosition) != null) {
-                break;
-            }
+
             possibleMoves.add(new Position(currentPosition));
         }
 
         for (Position attackDirection : attackDirections) {
             Position attackPosition = new Position(position);
             attackPosition.add(attackDirection);
-
-            if (board.getPieceFromPosition(attackPosition) != null
-                    && board.getPieceFromPosition(attackPosition).getColour() != colour
-                    && !Board.isOutOfBounds(attackPosition)) {
+            Piece attackPiece = board.getPieceFromPosition(attackPosition);
+            if (attackPiece != null && attackPiece.getColour() != colour) {
                 possibleMoves.add(new Position(attackPosition));
             } else if (board.getPassantPawnPosition() != null
                     && board.getPieceFromPosition(board.getPassantPawnPosition()).getColour() != colour

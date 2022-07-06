@@ -1,5 +1,9 @@
 package com.chess.Chess.model;
 
 public enum Colour {
-    WHITE, BLACK
+    WHITE, BLACK;
+
+    public Colour getOther() {
+        return this == WHITE ? BLACK : WHITE;
+    }
 }

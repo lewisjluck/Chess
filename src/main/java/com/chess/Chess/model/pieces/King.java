@@ -32,7 +32,7 @@ public class King extends Piece {
             Position currentPosition = new Position(position);
             currentPosition.add(direction);
             Piece piece = board.getPieceFromPosition(currentPosition);
-            if (Board.isOutOfBounds(currentPosition) || (piece != null && piece.getColour() == colour) || board.squareInCheck(currentPosition, colour)) {
+            if (currentPosition.isOutOfBounds() || (piece != null && piece.getColour() == colour)) {
                 continue;
             }
             possibleMoves.add(new Position(currentPosition));
@@ -53,7 +53,7 @@ public class King extends Piece {
                         boolean underAttack = false;
 
                         while (board.getPieceFromPosition(castlePosition) == null) {
-                            if (Board.isOutOfBounds(castlePosition)) {
+                            if (castlePosition.isOutOfBounds()) {
                                 break;
                             }
 

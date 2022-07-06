@@ -60,7 +60,7 @@ public abstract class Piece {
         for (Position direction : directions) {
             currentPosition.add(direction);
             while (board.getPieceFromPosition(currentPosition) == null) {
-                if (Board.isOutOfBounds(currentPosition)) {
+                if (currentPosition.isOutOfBounds()) {
                     break;
                 }
 

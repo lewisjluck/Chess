@@ -22,11 +22,13 @@ public class Board {
         player2 = new Player("TestPlayer2", Colour.WHITE);
         initialiseNewBoard();
         takenPieces = new ArrayList<>();
+
         passantTurn = 1;
         passantAttackPosition = null;
         passantPawnPosition = null;
         castleRookTo = null;
         castleRookFrom = null;
+        kingPositions = new HashMap<>();
         kingPositions.put(Colour.BLACK, new Position(0, 4));
         kingPositions.put(Colour.WHITE, new Position(7, 4));
     }
@@ -52,7 +54,7 @@ public class Board {
     }
 
     public List<List<String>> getDisplay() {
-2        List<List<String>> display = new ArrayList<>();
+        List<List<String>> display = new ArrayList<>();
 
         for (int row = 0; row < 8; row++) {
             List<String> rowDisplay = new ArrayList<>();
@@ -109,10 +111,6 @@ public class Board {
         return board.get(position);
     }
 
-    public static boolean isOutOfBounds(Position position) {
-        return (position.getRow() > 7 || position.getRow() < 0 || position.getColumn() > 7 || position.getColumn() < 0);
-    }
-
     public void promote (Position position, Colour colour) {
         /// somehow get promotion selection
         Piece selectedPiece = new Queen(colour);
@@ -151,7 +149,6 @@ public class Board {
 
             board.remove(from);
 
-            // Isolate communication with front end into separate class
             if (getPieceFromPosition(to) != null) {
                 takenPieces.add(getPieceFromPosition(to));
             }
@@ -187,32 +184,44 @@ public class Board {
     }
 
     public List<Position> getMoves(Position position, Colour colour) {
+        System.out.println(this);
+        System.out.print("Passant pawn: ");
+        System.out.println(passantPawnPosition);
+        System.out.print("Passant attack: ");
+        System.out.println(passantAttackPosition);
         Piece piece = getPieceFromPosition(position);
         if (piece == null || piece.getColour() != colour) {
             return new ArrayList<>();
         }
         List<Position> moves = piece.getPossibleMoves(this, position, colour);
-
-        if (squareInCheck(kingPositions.get(colour), colour)) {
-            List<Position> validMoves = new ArrayList<>();
-            for (Position to : moves) {
-                if (doesMoveGetOutOfCheck(position, to, colour)) {
-                    validMoves.add(to);
-                }
+        //CURRENTLY not working for pieces other than the king - test this!
+        List<Position> validMoves = new ArrayList<>();
+        for (Position to : moves) {
+            if (!isMoveInCheck(position, to, colour)) {
+                validMoves.add(to);
             }
-            moves = validMoves;
         }
 
-        return moves;
+        return validMoves;
     }
 
-    private boolean doesMoveGetOutOfCheck(Position from, Position to, Colour colour) {
+    private boolean isMoveInCheck(Position from, Position to, Colour colour) {
         Piece pieceToMove = board.remove(from);
-        board.put(to, pieceToMove);
-        boolean stillInCheck = squareInCheck(kingPositions.get(colour), colour);
+        Piece pieceTaken = board.put(to, pieceToMove);
+        if (pieceToMove instanceof King) {
+            kingPositions.put(pieceToMove.getColour(), to);
+        }
+
+        boolean inCheck = squareInCheck(kingPositions.get(colour), colour);
+
         board.remove(to);
         board.put(from, pieceToMove);
-        return stillInCheck;
+        board.put(to, pieceTaken);
+        if (pieceToMove instanceof King) {
+            kingPositions.put(pieceToMove.getColour(), from);
+        }
+
+        return inCheck;
     }
 
     public boolean squareInCheck(Position checkPosition, Colour colour) {
@@ -220,14 +229,11 @@ public class Board {
             Piece piece = square.getValue();
             Position position = square.getKey();
 
-            List<Position> moves;
-            if (colour == piece.getColour()) {
+            if (piece == null || colour == piece.getColour()) {
                 continue;
-            } else {
-                moves = getMoves(position, piece.getColour());
             }
 
-            for (Position move : moves) {
+            for (Position move : piece.getPossibleMoves(this, position, colour.getOther())) {
                 if (move.equals(checkPosition)) {
                     return true;
                 }

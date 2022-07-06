@@ -28,7 +28,7 @@ public class Knight extends Piece {
                         currentPosition.add(new Position(hookDirection, stemDirection));
                     }
                     Piece piece = board.getPieceFromPosition(currentPosition);
-                    if (Board.isOutOfBounds(currentPosition) || (piece != null && piece.getColour() == colour)) {
+                    if (currentPosition.isOutOfBounds() || (piece != null && piece.getColour() == colour)) {
                         continue;
                     }
                     possibleMoves.add(new Position(currentPosition));

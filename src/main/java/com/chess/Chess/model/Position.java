@@ -16,28 +16,6 @@ public class Position {
         this.column = position.getColumn();
     }
 
-    public static Position getPositionFromString(String position) {
-        String[] positions = position.split("-");
-
-        int row;
-        try {
-            row = Integer.parseInt(positions[0]);
-        } catch (NumberFormatException e) {
-            System.out.println(e);
-            return null;
-        }
-
-        int col;
-        try {
-            col = Integer.parseInt(positions[1]);
-        } catch (NumberFormatException e) {
-            System.out.println(e);
-            return null;
-        }
-
-        return new Position(row, col);
-    }
-
     public int getColumn() {
         return column;
     }
@@ -57,6 +35,10 @@ public class Position {
 
     public boolean isInLastRow(Colour colour) {
         return (colour == Colour.WHITE && row == 0) || (colour == Colour.BLACK && row == 7);
+    }
+
+    public boolean isOutOfBounds() {
+        return (row > 7 || row < 0 || column > 7 || column < 0);
     }
 
     @Override
