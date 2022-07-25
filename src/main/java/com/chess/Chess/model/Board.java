@@ -1,5 +1,6 @@
 package com.chess.Chess.model;
 
+import com.chess.Chess.controller.MoveResponse;
 import com.chess.Chess.model.pieces.*;
 
 import java.util.*;
@@ -16,21 +17,27 @@ public class Board {
     private Position castleRookFrom;
     private Position castleKingTo;
     private HashMap<Colour, Position> kingPositions;
+    private Map<Colour, Map<String, Boolean>> movedRooks;
+    private int fullMoveCount;
 
     public Board() {
         player1 = new Player("TestPlayer1", Colour.BLACK);
         player2 = new Player("TestPlayer2", Colour.WHITE);
-        initialiseNewBoard();
         takenPieces = new ArrayList<>();
-
         passantTurn = 1;
         passantAttackPosition = null;
         passantPawnPosition = null;
         castleRookTo = null;
         castleRookFrom = null;
+        castleKingTo = null;
         kingPositions = new HashMap<>();
         kingPositions.put(Colour.BLACK, new Position(0, 4));
         kingPositions.put(Colour.WHITE, new Position(7, 4));
+        movedRooks = new HashMap<>();
+        movedRooks.put(Colour.WHITE, new HashMap<>());
+        movedRooks.put(Colour.BLACK, new HashMap<>());
+        fullMoveCount = 0;
+        initialiseNewBoard();
     }
 
     public Position getPassantAttackPosition() {
@@ -89,22 +96,20 @@ public class Board {
         addBackPieces(Colour.WHITE, 7);
     }
     private void addBackPieces(Colour colour, int row) {
-        board.put(new Position(row,0), new Rook(colour));
+        board.put(new Position(row,0), new Rook(colour, "Q"));
         board.put(new Position(row,1), new Knight(colour));
         board.put(new Position(row,2), new Bishop(colour));
         board.put(new Position(row,3), new Queen(colour));
         board.put(new Position(row,4), new King(colour));
         board.put(new Position(row,5), new Bishop(colour));
         board.put(new Position(row,6), new Knight(colour));
-        board.put(new Position(row,7), new Rook(colour));
+        board.put(new Position(row,7), new Rook(colour, "K"));
+        movedRooks.get(colour).put("K", false);
+        movedRooks.get(colour).put("Q", false);
     }
 
     public static Position getForwardDirection(Colour colour) {
-        if (colour == Colour.WHITE) {
-            return new Position(-1, 0);
-        } else {
-            return new Position(1, 0);
-        }
+        return colour == Colour.WHITE ? new Position(-1, 0) : new Position(1, 0);
     }
 
     public Piece getPieceFromPosition(Position position) {
@@ -117,17 +122,18 @@ public class Board {
         board.put(position, selectedPiece);
     }
 
-    public HashMap<String, List<String>> move(Position from, Position to, Colour colour) {
+    public MoveResponse move(Position from, Position to, Colour colour) {
         Piece pieceToMove = getPieceFromPosition(from);
         if (pieceToMove == null) {
             return null;
         }
 
-        HashMap<String, List<String>> positionsToChange = new HashMap<>();
-        positionsToChange.put("position", new ArrayList<>());
-        positionsToChange.put("display", new ArrayList<>());
+        MoveResponse moveResponse = new MoveResponse();
 
         if (pieceToMove.getPossibleMoves(this, from, colour).contains(to)) {
+            if (colour == Colour.BLACK) {
+                fullMoveCount += 1;
+            }
             if (pieceToMove instanceof Pawn) {
                 if (Math.abs(to.getRow() - from.getRow()) == 2 && from.isInFirstRow(colour)) {
                     passantPawnPosition = to;
@@ -145,6 +151,7 @@ public class Board {
 
             } else if (pieceToMove instanceof Rook) {
                 ((Rook) pieceToMove).setHasMoved(true);
+                movedRooks.get(colour).put(((Rook) pieceToMove).getSide(), true);
             }
 
             board.remove(from);
@@ -155,18 +162,15 @@ public class Board {
 
             if (to.equals(passantAttackPosition)) {
                 board.remove(passantPawnPosition);
-                positionsToChange.get("position").add(passantPawnPosition.toString());
-                positionsToChange.get("display").add("NONE");
+                moveResponse.addTile(passantPawnPosition, null);
             }
 
             if (to.equals(castleKingTo)) {
                 Piece pieceToCastle = getPieceFromPosition(castleRookFrom);
                 board.remove(castleRookFrom);
                 board.put(castleRookTo, pieceToCastle);
-                positionsToChange.get("position").add(castleRookFrom.toString());
-                positionsToChange.get("display").add("NONE");
-                positionsToChange.get("position").add(castleRookTo.toString());
-                positionsToChange.get("display").add(pieceToCastle.getDisplay());
+                moveResponse.addTile(castleRookFrom, null);
+                moveResponse.addTile(castleRookTo, pieceToCastle);
             }
 
             board.put(to, pieceToMove);
@@ -179,22 +183,18 @@ public class Board {
 
             // CHECK CHECKMATE OF OTHER PLAYER
         }
+        // moveResponse.gameOver();
 
-        return positionsToChange;
+        return moveResponse;
     }
 
     public List<Position> getMoves(Position position, Colour colour) {
-        System.out.println(this);
-        System.out.print("Passant pawn: ");
-        System.out.println(passantPawnPosition);
-        System.out.print("Passant attack: ");
-        System.out.println(passantAttackPosition);
         Piece piece = getPieceFromPosition(position);
         if (piece == null || piece.getColour() != colour) {
             return new ArrayList<>();
         }
         List<Position> moves = piece.getPossibleMoves(this, position, colour);
-        //CURRENTLY not working for pieces other than the king - test this!
+
         List<Position> validMoves = new ArrayList<>();
         for (Position to : moves) {
             if (!isMoveInCheck(position, to, colour)) {
@@ -240,6 +240,59 @@ public class Board {
             }
         }
         return false;
+    }
+
+    public String getFENPiecePlacement() {
+        StringJoiner builder = new StringJoiner("");
+        for (int row = 0; row < 8; row++) {
+            int emptyCount = 0;
+            for (int col = 0; col < 8; col++) {
+                if (getPieceFromPosition(new Position(row, col)) == null) {
+                    emptyCount++;
+                } else {
+                    Piece piece = getPieceFromPosition(new Position(row, col));
+                    if (emptyCount != 0) {
+                        builder.add(Integer.toString(emptyCount));
+                        emptyCount = 0;
+                    }
+                    builder.add(piece.getFENSymbol());
+                }
+            }
+            if (emptyCount != 0) {
+                builder.add(Integer.toString(emptyCount));
+            }
+            builder.add("/");
+        }
+        return builder.toString();
+    }
+
+    public String getCastlingRights() {
+        StringBuilder builder = new StringBuilder();
+        for (Colour colour : Colour.values()) {
+            if (((King) getPieceFromPosition(kingPositions.get(colour))).getHasMoved()) {
+                continue;
+            }
+            for (Map.Entry<String, Boolean> entry : movedRooks.get(colour).entrySet()) {
+
+                if (!entry.getValue()) {
+                    builder.append(colour == Colour.WHITE ? entry.getKey().toUpperCase(Locale.ROOT) :
+                            entry.getKey().toLowerCase(Locale.ROOT));
+                }
+            }
+
+        }
+        return builder.toString() == "" ? "-" : builder.toString();
+    }
+
+    public String getFEN(String activeColour) {
+        StringJoiner joiner = new StringJoiner(" ");
+        joiner.add(getFENPiecePlacement());
+        joiner.add(activeColour.substring(0, 1));
+        joiner.add(getCastlingRights());
+        joiner.add(passantAttackPosition == null ? "-" : passantAttackPosition.toString());
+        joiner.add("0");
+        joiner.add(Integer.toString(fullMoveCount));
+        return joiner.toString();
     }
 
     @Override

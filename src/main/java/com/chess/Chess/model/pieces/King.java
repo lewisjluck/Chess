@@ -19,7 +19,7 @@ public class King extends Piece {
 
     @Override
     public String getSymbol() {
-        return "C";
+        return "K";
     }
 
     @Override
@@ -79,5 +79,9 @@ public class King extends Piece {
 
 
         return possibleMoves;
+    }
+
+    public boolean getHasMoved() {
+        return hasMoved;
     }
 }

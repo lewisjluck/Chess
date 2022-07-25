@@ -1,12 +1,20 @@
+function presentMessage(message) {
+  $("#overlay").css("display", "flex");
+  $("#overlay").append("<span id=\"message\">" + message + "<br> <a href=\"play\">Play Again?</a></span>");
+}
+
 $(function() {
     var lastClicked = null;
     var possibleMoves = [];
     var clicked = null;
     var user = "white";
 
+    // when a cell is clicked
     $(".cell").click(function() {
-        var coords = $(this).attr("id").substring(1);
+        // access coordinates of clicked cell
+        var coords = $(this).attr("id")
 
+        // another cell has been previously clicked - need to clear highlighting
         if (clicked != null) {
             if ($(clicked).hasClass("light")) {
                 $(clicked).toggleClass("light-clicked");
@@ -15,19 +23,24 @@ $(function() {
             }
         }
 
+        // add highlighting for clicked cell
         if ($(this).hasClass("light")) {
             $(this).toggleClass("light-clicked");
         } else {
             $(this).toggleClass("dark-clicked");
         }
 
+        // store clicked cell for clearing or moving next click
         clicked = this;
 
+        // remove style from previous click's possible moves
         var moved = null;
         possibleMoves.forEach(cell => {
-            $("#t" + cell["row"] + "-" + cell["column"] + " .empty").removeClass("circle-option");
-            $("#t" + cell["row"] + "-" + cell["column"] + " img").removeClass("piece-option");
-            if (coords == cell["row"] + "-" + cell["column"]) {
+            $("#" + cell + " .empty").removeClass("circle-option");
+            $("#" + cell + " img").removeClass("piece-option");
+
+            // this click is a previous'c click possible move -> move has occurred
+            if (coords == cell) {
                 moved = cell;
             }
         });
@@ -36,9 +49,9 @@ $(function() {
 
         if (moved) {
             // move piece image to new location
-            var image = $("#t" + lastClicked).html();
-            $("#t" + lastClicked + " img").remove();
-            $("#t" + lastClicked).html("<div class='empty'></div>");
+            var image = $("#" + lastClicked).html();
+            $("#" + lastClicked + " img").remove();
+            $("#" + lastClicked).html("<div class='empty'></div>");
             $(this).html(image);
 
             $.ajax({
@@ -48,13 +61,19 @@ $(function() {
                         "player" : user},
                 success:
                 function (data) {
-                    for (var i = 0; i < data["display"].length; i++) {
-                        var display = data["display"][i];
-                        var position = data["position"][i];
-                        if (display == "NONE") {
-                            $("#t" + position).html("<div class='empty'></div>");
-                        } else {
-                            $("#t" + position).html("<img class='piece' src='" + display + "'>");
+                    data = data["json"];
+                    if (data["gameOver"] == "true") {
+                        ;
+                        //presentMessage(data["gameOver"], data["winner"], data["loser"])
+                    } else {
+                        for (var i = 0; i < data["display"].length; i++) {
+                            var display = data["display"][i];
+                            var position = data["position"][i];
+                            if (display == "NONE") {
+                                $("#" + position).html("<div class='empty'></div>");
+                            } else {
+                                $("#" + position).html("<img class='piece' src='" + display + "'>");
+                            }
                         }
                     }
                 }
@@ -69,17 +88,17 @@ $(function() {
             return;
         }
 
+        // each turn fetch moves from clicked square
         $.ajax({
             url: "/get_moves",
             data: {"coords" : coords,
                    "player" : user}
         }).then(function(data) {
-            console.log(data);
-            for (var i = 0; i < data.length; i++) {
-               $("#t" + data[i]["row"] + "-" + data[i]["column"] + " .empty").addClass("circle-option");
-               $("#t" + data[i]["row"] + "-" + data[i]["column"] + " img").addClass("piece-option")
-               possibleMoves.push(data[i]);
-            }
+            data.forEach(cell => {
+                $("#" + cell + " .empty").addClass("circle-option");
+                $("#" + cell + " img").addClass("piece-option")
+                possibleMoves.push(cell);
+            });
         });
 
         lastClicked = coords;

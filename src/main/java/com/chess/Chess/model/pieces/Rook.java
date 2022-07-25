@@ -7,10 +7,12 @@ import java.util.List;
 
 public class Rook extends Piece {
     private boolean hasMoved;
+    private String side;
 
-    public Rook(Colour colour) {
+    public Rook(Colour colour, String side) {
         super(colour);
         hasMoved = false;
+        this.side = side;
     }
 
     @Override
@@ -27,6 +29,10 @@ public class Rook extends Piece {
 
     public boolean hasMoved() {
         return hasMoved;
+    }
+
+    public String getSide() {
+        return side;
     }
 
     public void setHasMoved(boolean set) {

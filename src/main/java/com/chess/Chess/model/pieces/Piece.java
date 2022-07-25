@@ -2,10 +2,7 @@ package com.chess.Chess.model.pieces;
 
 import com.chess.Chess.model.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class Piece {
     private final Colour colour;
@@ -82,6 +79,10 @@ public abstract class Piece {
 
     public String getDisplay() {
         return "pieces/" + colour.toString() + "_" + getClass().getSimpleName() + ".png";
+    }
+
+    public String getFENSymbol() {
+        return colour == Colour.WHITE ? getSymbol().toUpperCase(Locale.ROOT) : getSymbol().toLowerCase(Locale.ROOT);
     }
 }
 

@@ -17,15 +17,22 @@ import java.util.Optional;
 @RestController
 public class APIController {
     @GetMapping("/get_moves")
-    public List<Position> getMoves(@RequestParam String coords, @RequestParam String player) {
+    public List<String> getMoves(@RequestParam String coords, @RequestParam String player) {
         Position position = Parser.getPositionFromString(coords);
-        return HomeController.board.getMoves(position, Colour.valueOf(player.toUpperCase(Locale.ROOT)));
+        return Parser.formatJsonMoves(HomeController.board.getMoves(position, Colour.valueOf(player.toUpperCase(Locale.ROOT))));
     }
 
     @GetMapping("/move")
-    public HashMap<String, List<String>> move(@RequestParam String player, @RequestParam String from, @RequestParam String to) {
+    public MoveResponse move(@RequestParam String player, @RequestParam String from, @RequestParam String to) {
         Position moveFrom = Parser.getPositionFromString(from);
         Position moveTo = Parser.getPositionFromString(to);
+        EngineController.getMoveFromStockfish("test");
         return HomeController.board.move(moveFrom, moveTo, Colour.valueOf(player.toUpperCase(Locale.ROOT)));
+    }
+
+    @GetMapping("/get_engine_move")
+    public MoveResponse getEngineMove(@RequestParam String player) {
+        String fen = HomeController.board.getFEN(player);
+        return new MoveResponse();
     }
 }

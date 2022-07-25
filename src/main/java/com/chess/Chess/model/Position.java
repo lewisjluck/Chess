@@ -56,11 +56,11 @@ public class Position {
 
     @Override
     public String toString() {
-        return "" + row + "-" + column;
+        char col = (char) (column + 97);
+        return "" + col + (8 - row);
     }
 
     public String getDisplay() {
-        char col = (char) (column + 97);
-        return "(" + col + "," + (8 - row) + ")";
+        return "t" + row + "-" + column;
     }
 }
