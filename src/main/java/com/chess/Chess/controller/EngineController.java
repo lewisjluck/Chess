@@ -4,24 +4,69 @@ import java.io.*;
 import java.util.Arrays;
 
 public class EngineController {
-    public static void getMoveFromStockfish(String difficulty) {
-        ProcessBuilder builder = new ProcessBuilder("stockfish");
-        Process process = null;
-        try {
-            process = builder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            reader.readLine();
-            Writer writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-            writer.write("uci\n");
-            writer.flush();
-            String line;
-            while (reader.ready() && (line = reader.readLine()) != null) {
-                System.out.println(line);
+    private Process engine;
+    private BufferedReader engineOutput;
+    private BufferedWriter engineInput;
+
+    private void sendCommand(String command) throws IOException {
+        engineInput.write(command + "\n");
+        engineInput.flush();
+    }
+
+    private String readUntil(String endPhrase) throws IOException {
+        String line;
+        String lastLine = "";
+        while ((line = engineOutput.readLine()) != null) {
+            lastLine = line;
+            if (line.startsWith(endPhrase)) {
+                break;
             }
-        } catch (IOException e) {
-            System.out.println("An error occurred");
-            System.out.println(e);
+            if (!engineOutput.ready()) {
+                throw new IOException("Expected output not received.");
+            }
         }
-        process.destroyForcibly();
+        return lastLine;
+    }
+
+    public void initialiseEngine(String elo) {
+        ProcessBuilder builder = new ProcessBuilder("stockfish");
+        try {
+            // setup engine config
+            engine = builder.start();
+            engineOutput = new BufferedReader(new InputStreamReader(engine.getInputStream()));
+            engineInput = new BufferedWriter(new OutputStreamWriter(engine.getOutputStream()));
+
+            // discard stockfish intro
+            engineOutput.readLine();
+
+            // initialise uci and newgame
+            sendCommand("uci");
+            readUntil("uciok");
+
+            sendCommand("ucinewgame");
+            sendCommand("setoption name UCI_LimitStrength value true");
+            sendCommand("setoption name UCI_Elo value " + elo);
+
+            sendCommand("isready");
+            readUntil("readyok");
+        } catch (IOException e) {
+            System.out.println("An error occurred in initialising Stockfish: ");
+            e.printStackTrace();
+        }
+    }
+
+    public String getMove(String fen) {
+        try {
+            sendCommand("position fen " + fen);
+            sendCommand("go movetime 250");
+            Thread.sleep(250);
+            return readUntil("bestmove").split(" ")[1];
+        } catch (IOException e) {
+            System.out.println("An error occurred in generating the engine move: ");
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            System.out.println("Error with sleep wait.");
+        }
+        return "";
     }
 }

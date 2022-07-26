@@ -16,6 +16,8 @@ import java.util.Optional;
 
 @RestController
 public class APIController {
+    private EngineController engine = null;
+
     @GetMapping("/get_moves")
     public List<String> getMoves(@RequestParam String coords, @RequestParam String player) {
         Position position = Parser.getPositionFromString(coords);
@@ -26,13 +28,30 @@ public class APIController {
     public MoveResponse move(@RequestParam String player, @RequestParam String from, @RequestParam String to) {
         Position moveFrom = Parser.getPositionFromString(from);
         Position moveTo = Parser.getPositionFromString(to);
-        EngineController.getMoveFromStockfish("test");
         return HomeController.board.move(moveFrom, moveTo, Colour.valueOf(player.toUpperCase(Locale.ROOT)));
     }
 
     @GetMapping("/get_engine_move")
-    public MoveResponse getEngineMove(@RequestParam String player) {
+    public MoveResponse getEngineMove(@RequestParam String player, @RequestParam String elo) {
+        if (engine == null) {
+            engine = new EngineController();
+            engine.initialiseEngine(elo);
+        }
+
         String fen = HomeController.board.getFEN(player);
-        return new MoveResponse();
+        String bestMove = engine.getMove(fen);
+
+        System.out.println(fen);
+        System.out.println(bestMove);
+        System.out.println(HomeController.board);
+
+        Position from = Parser.getPositionFromNotation(bestMove.substring(0,2));
+        Position to = Parser.getPositionFromNotation(bestMove.substring(2,4));
+
+        MoveResponse response = HomeController.board.move(from, to, Colour.valueOf(player.toUpperCase(Locale.ROOT)));
+        response.addTile(from, null);
+        response.addTile(to, HomeController.board.getPieceFromPosition(to));
+
+        return response;
     }
 }

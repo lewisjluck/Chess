@@ -61,7 +61,6 @@ $(function() {
                         "player" : user},
                 success:
                 function (data) {
-                    data = data["json"];
                     if (data["gameOver"] == "true") {
                         ;
                         //presentMessage(data["gameOver"], data["winner"], data["loser"])
@@ -75,15 +74,42 @@ $(function() {
                                 $("#" + position).html("<img class='piece' src='" + display + "'>");
                             }
                         }
+
+                        $.ajax({
+                                        url: "/get_engine_move",
+                                        data: { "elo" : "2000",
+                                                "player" : "black"},
+                                        success:
+                                        function (data) {
+                                            if (data["gameOver"] == "true") {
+                                                ;
+                                                //presentMessage(data["gameOver"], data["winner"], data["loser"])
+                                            } else {
+                                                for (var i = 0; i < data["display"].length; i++) {
+                                                    var display = data["display"][i];
+                                                    var position = data["position"][i];
+                                                    if (display == "NONE") {
+                                                        $("#" + position).html("<div class='empty'></div>");
+                                                    } else {
+                                                        $("#" + position).html("<img class='piece' src='" + display + "'>");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
                     }
                 }
             });
 
+            /*
             if (user == "white") {
                 user = "black";
             } else {
                 user = "white"
             }
+            */
+
+
 
             return;
         }

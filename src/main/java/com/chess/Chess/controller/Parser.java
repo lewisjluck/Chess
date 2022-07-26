@@ -31,4 +31,11 @@ public class Parser {
     public static List<String> formatJsonMoves(List<Position> positions) {
         return positions.stream().map(Position::getDisplay).collect(Collectors.toList());
     }
+
+    public static Position getPositionFromNotation(String pos) {
+        //LAN = long algebraic notation
+        int column = pos.charAt(0) - 97;
+        int row = 8 - Character.getNumericValue(pos.charAt(1));
+        return new Position(row, column);
+    }
 }

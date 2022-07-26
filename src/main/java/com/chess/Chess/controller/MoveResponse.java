@@ -26,4 +26,16 @@ public class MoveResponse {
     public void gameOver() {
         gameOver = true;
     }
+
+    public List<String> getDisplay() {
+        return display;
+    }
+
+    public List<String> getPosition() {
+        return position;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
 }
