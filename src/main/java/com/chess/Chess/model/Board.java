@@ -130,7 +130,7 @@ public class Board {
 
         MoveResponse moveResponse = new MoveResponse();
 
-        if (pieceToMove.getPossibleMoves(this, from, colour).contains(to)) {
+        if (pieceToMove.getPossibleMoves(this, from, colour, false).contains(to)) {
             if (colour == Colour.BLACK) {
                 fullMoveCount += 1;
             }
@@ -193,7 +193,7 @@ public class Board {
         if (piece == null || piece.getColour() != colour) {
             return new ArrayList<>();
         }
-        List<Position> moves = piece.getPossibleMoves(this, position, colour);
+        List<Position> moves = piece.getPossibleMoves(this, position, colour, false);
 
         List<Position> validMoves = new ArrayList<>();
         for (Position to : moves) {
@@ -233,7 +233,7 @@ public class Board {
                 continue;
             }
 
-            for (Position move : piece.getPossibleMoves(this, position, colour.getOther())) {
+            for (Position move : piece.getPossibleMoves(this, position, colour.getOther(), true)) {
                 if (move.equals(checkPosition)) {
                     return true;
                 }

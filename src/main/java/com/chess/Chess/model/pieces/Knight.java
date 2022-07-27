@@ -16,7 +16,7 @@ public class Knight extends Piece {
     }
 
     @Override
-    public List<Position> getPossibleMoves(Board board, Position position, Colour colour) {
+    public List<Position> getPossibleMoves(Board board, Position position, Colour colour, boolean test) {
         List<Position> possibleMoves = new ArrayList<>();
         for (int stemDirection = -2; stemDirection < 5; stemDirection += 4) {
             for (int hookDirection = -1; hookDirection < 2; hookDirection += 2) {

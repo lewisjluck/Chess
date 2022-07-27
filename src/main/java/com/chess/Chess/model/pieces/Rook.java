@@ -21,7 +21,7 @@ public class Rook extends Piece {
     }
 
     @Override
-    public List<Position> getPossibleMoves(Board board, Position position, Colour colour) {
+    public List<Position> getPossibleMoves(Board board, Position position, Colour colour, boolean test) {
         List<Position> directions = new ArrayList<>(straightDirections);
 
         return getMovesFromDirection(directions, board, position, colour);

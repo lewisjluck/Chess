@@ -6,7 +6,7 @@ import java.util.*;
 
 public abstract class Piece {
     private final Colour colour;
-    public abstract List<Position> getPossibleMoves(Board board, Position position, Colour colour);
+    public abstract List<Position> getPossibleMoves(Board board, Position position, Colour colour, boolean test);
     public static final List<Position> straightDirections = new ArrayList<>(Arrays.asList(
             new Position(0, -1),
             new Position(-1, 0),

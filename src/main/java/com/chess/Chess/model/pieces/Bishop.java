@@ -16,7 +16,7 @@ public class Bishop extends Piece {
     }
 
     @Override
-    public List<Position> getPossibleMoves(Board board, Position position, Colour colour) {
+    public List<Position> getPossibleMoves(Board board, Position position, Colour colour, boolean test) {
         List<Position> directions = new ArrayList<>(diagonalDirections);
 
         return getMovesFromDirection(directions, board, position, colour);

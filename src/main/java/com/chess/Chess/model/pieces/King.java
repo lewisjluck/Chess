@@ -23,7 +23,7 @@ public class King extends Piece {
     }
 
     @Override
-    public List<Position> getPossibleMoves(Board board, Position position, Colour colour) {
+    public List<Position> getPossibleMoves(Board board, Position position, Colour colour, boolean test) {
         List<Position> possibleMoves = new ArrayList<>();
         List<Position> directions = new ArrayList<>(straightDirections);
         directions.addAll(diagonalDirections);
@@ -39,28 +39,23 @@ public class King extends Piece {
         }
 
         // castling
-        if (!hasMoved) {
+        if (!test && !hasMoved && !board.squareInCheck(position,colour)) {
             for (Position direction : horizontalDirections) {
                 Position currentPosition = new Position(position);
                 currentPosition.add(direction);
+
                 Position castleRookTo = new Position(currentPosition);
+                boolean underAttack = board.squareInCheck(currentPosition, colour);
+
                 if (board.getPieceFromPosition(currentPosition) == null) {
                     currentPosition.add(direction);
+                    underAttack |= board.squareInCheck(currentPosition, colour);
+
                     if (board.getPieceFromPosition(currentPosition) == null) {
-                        Position castlePosition = new Position(position);
+                        Position castlePosition = new Position(currentPosition);
                         castlePosition.add(direction);
 
-                        boolean underAttack = false;
-
-                        while (board.getPieceFromPosition(castlePosition) == null) {
-                            if (castlePosition.isOutOfBounds()) {
-                                break;
-                            }
-
-                            if (board.squareInCheck(castlePosition, colour)) {
-                                underAttack = true;
-                            }
-
+                        if (board.getPieceFromPosition(castlePosition) == null) {
                             castlePosition.add(direction);
                         }
 

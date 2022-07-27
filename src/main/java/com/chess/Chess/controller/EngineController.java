@@ -59,7 +59,7 @@ public class EngineController {
         try {
             sendCommand("position fen " + fen);
             sendCommand("go movetime 250");
-            Thread.sleep(250);
+            Thread.sleep(300);
             return readUntil("bestmove").split(" ")[1];
         } catch (IOException e) {
             System.out.println("An error occurred in generating the engine move: ");
