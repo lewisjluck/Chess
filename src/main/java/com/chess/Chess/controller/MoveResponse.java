@@ -10,12 +10,14 @@ import java.util.List;
 public class MoveResponse {
     private List<String> position;
     private List<String> display;
-    boolean gameOver;
+    boolean checkmate;
+    boolean stalemate;
 
     public MoveResponse() {
         position = new ArrayList<>();
         display = new ArrayList<>();
-        gameOver = false;
+        checkmate = false;
+        stalemate = false;
     }
 
     public void addTile(Position to, Piece piece) {
@@ -23,9 +25,11 @@ public class MoveResponse {
         display.add(piece != null ? piece.getDisplay() : "NONE");
     }
 
-    public void gameOver() {
-        gameOver = true;
+    public void setCheckmate() {
+        checkmate = true;
     }
+
+    public void setStalemate() { stalemate = true; }
 
     public List<String> getDisplay() {
         return display;
@@ -35,7 +39,11 @@ public class MoveResponse {
         return position;
     }
 
-    public boolean isGameOver() {
-        return gameOver;
+    public boolean isCheckmate() {
+        return checkmate;
+    }
+
+    public boolean isStalemate() {
+        return stalemate;
     }
 }

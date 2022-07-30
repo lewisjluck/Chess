@@ -181,9 +181,14 @@ public class Board {
                 passantAttackPosition = null;
             }
 
-            // CHECK CHECKMATE OF OTHER PLAYER
+            if (isCheckmate(colour.getOther())) {
+                moveResponse.setCheckmate();
+            }
+
+            if (isStalemate(colour.getOther())) {
+                moveResponse.setStalemate();
+            }
         }
-        // moveResponse.gameOver();
 
         return moveResponse;
     }
@@ -222,6 +227,28 @@ public class Board {
         }
 
         return inCheck;
+    }
+
+    private boolean noMovesPossible(Colour colour) {
+        for (Map.Entry<Position, Piece> tile : board.entrySet()) {
+            Position position = tile.getKey();
+            Piece piece = tile.getValue();
+
+            if (piece == null || piece.getColour() != colour) { continue; }
+
+            if (piece.getPossibleMoves(this, position, colour, true).size() != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isCheckmate(Colour colour) {
+        return noMovesPossible(colour) && squareInCheck(kingPositions.get(colour), colour);
+    }
+
+    private boolean isStalemate(Colour colour) {
+        return noMovesPossible(colour) && !squareInCheck(kingPositions.get(colour), colour);
     }
 
     public boolean squareInCheck(Position checkPosition, Colour colour) {

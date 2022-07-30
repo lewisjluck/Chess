@@ -81,9 +81,11 @@ $(function() {
                                                 "player" : "black"},
                                         success:
                                         function (data) {
-                                            if (data["gameOver"] == "true") {
-                                                ;
+                                            if (data["checkmate"] == "true") {
+                                                console.log("CHECKMATE");
                                                 //presentMessage(data["gameOver"], data["winner"], data["loser"])
+                                            } else if (data["stalemate"] == true) {
+                                                console.log("STALEMATE");
                                             } else {
                                                 for (var i = 0; i < data["display"].length; i++) {
                                                     var display = data["display"][i];
